@@ -40,7 +40,7 @@ option(STABLEVERSE_BUILD_COMMERCIAL_PLUGINS
 # E:\_SourceForge\proj_qSD\thirdparty\stable-diffusion__QT_5_15_6_Windows_MSVC_C_19.43.34810.0_CC_19.43.34810.0__x64_bin-cu12.9.86
 # 设置 DLL 输出目录（可选）
 # set(NAME_EXE ${CMAKE_SOURCE_DIR}/../thirdparty/stable-diffusion__QT_5_15_6_Windows_MSVC_C_19.43.34810.0_CC_19.43.34810.0__x64_bin-cu12.9.86/sd.exe)
-set(NAME_EXE ${CMAKE_SOURCE_DIR}/../qSD_0.1_Windows_MSVC_CC_19.44.35226.0_17_x64_bin/Release/sd-cli.exe)
+set(NAME_EXE ${CMAKE_SOURCE_DIR}/../build-msvc/bin/Release/sd-cli.exe)
 # set_target_properties(${NAME_EXE} PROPERTIES
 #     LIBRARY_OUTPUT_DIRECTORY ${EXECUTABLE_OUTPUT_PATH}
 #     RUNTIME_OUTPUT_DIRECTORY ${EXECUTABLE_OUTPUT_PATH}
@@ -61,19 +61,19 @@ set(NAME_EXE ${CMAKE_SOURCE_DIR}/../qSD_0.1_Windows_MSVC_CC_19.44.35226.0_17_x64
 
 # 使用file COPY命令拷贝文件
 if(EXISTS ${NAME_EXE})
-    file(COPY ${NAME_EXE} DESTINATION ${CMAKE_RUNTIME_OUTPUT_DIRECTORY})# /plugins
-    message("<-------- 文件存在：${NAME_EXE},已经拷贝到: ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}")
+    file(COPY ${NAME_EXE} DESTINATION ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/Release)# /plugins
+    message("<-------- 文件存在：${NAME_EXE},已经拷贝到: ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/Release")
 else()
     message("<-------- 文件不存在：${NAME_EXE}")
 endif()
 
-set(NAME_EXE ${CMAKE_SOURCE_DIR}/../thirdparty/stable-diffusion__QT_5_15_6_Windows_MSVC_C_19.43.34810.0_CC_19.43.34810.0__x64_bin-cu12.9.86/stable-diffusion.dll)
-if(EXISTS ${NAME_EXE})
-    file(COPY ${NAME_EXE} DESTINATION ${CMAKE_RUNTIME_OUTPUT_DIRECTORY})# /plugins
-    message("<-------- 文件存在：${NAME_EXE},已经拷贝到: ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}")
-else()
-    message("<-------- 文件不存在：${NAME_EXE}")
-endif()
+# set(NAME_EXE ${CMAKE_SOURCE_DIR}/../thirdparty/stable-diffusion__QT_5_15_6_Windows_MSVC_C_19.43.34810.0_CC_19.43.34810.0__x64_bin-cu12.9.86/stable-diffusion.dll)
+# if(EXISTS ${NAME_EXE})
+#     file(COPY ${NAME_EXE} DESTINATION ${CMAKE_RUNTIME_OUTPUT_DIRECTORY})# /plugins
+#     message("<-------- 文件存在：${NAME_EXE},已经拷贝到: ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}")
+# else()
+#     message("<-------- 文件不存在：${NAME_EXE}")
+# endif()
 
 
 # add_subdirectory(Anydraw)    # 不带内存管理：非开源项目anydraw： 开源项目drawanything的绘画；

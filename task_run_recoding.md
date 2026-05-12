@@ -6,8 +6,9 @@ G:\_busi1_MUST_BUSI_APP\proj_IllustrationVerse\src
 cmake位置：D:\win10\cmake-4.2.1-windows-x86_64\bin\cmake.exe
 qt6位置；D:\Qt
 ninja位置；D:\win10\ninja.exe
-TensorRT:D:\win10\TensorRT-10.16.1.11.Windows.amd64.cuda-13.2
-cuda13: "C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v13.2"
+TensorRT:D:\win10\TensorRT-10.16.1.11.Windows.amd64.cuda-12.8
+cuda13: "C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v12.8"
+vulkan目录式：C:\VulkanSDK
 考虑基于msvc2022-64进行编译运行。
 
 stable-diffusion.cpp是一个第三方的库，不要修改；
@@ -36,8 +37,8 @@ Anydraw也是打算做成另一个增强的插件库，文件夹和其他名字�
 by-poweshell:
 
 ```powershell
-$env:PATH = "D:\win10\TensorRT-10.16.1.11.Windows.amd64.cuda-13.2\lib;" + $env:PATH
-$env:PATH += ";D:\Qt\6.11.0\msvc2022_64\bin;D:\opencv4130\build\x64\vc16\bin;C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v13.2\bin;C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v13.2\nvvm\bin"
+$env:PATH = "D:\win10\TensorRT-10.16.1.11.Windows.amd64.cuda-12.8\lib;" + $env:PATH
+$env:PATH += ";D:\Qt\6.11.0\msvc2022_64\bin;D:\opencv4130\build\x64\vc16\bin;C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v12.8\bin;C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v12.8\nvvm\bin"
 ```
 
 by-cmd: x64 Native Tools Command Prompt for VS2022:
@@ -47,12 +48,12 @@ by-cmd: x64 Native Tools Command Prompt for VS2022:
 ```cmd
 cd /d G:\_busi1_MUST_BUSI_APP\proj_IllustrationVerse
 
-"D:\win10\cmake-4.2.1-windows-x86_64\bin\cmake.exe" -S ".\IllustrationVerse" -B ".\build-msvc" -G "Visual Studio 17 2022" -A x64    -DYOLOV8_WITH_TRT=ON   -DYOLOV8_TRT_ROOT="D:/win10/TensorRT-10.16.1.11.Windows.amd64.cuda-13.2"   -DYOLOV8_CUDA_ROOT="C:/Program Files/NVIDIA GPU Computing Toolkit/CUDA/v13.2"   -DCMAKE_PREFIX_PATH="D:/Qt/6.11.0/msvc2022_64"   -DOpenCV_DIR="D:/opencv4130/build" -DSD_BUILD_EXAMPLES=1 -DSD_BUILD_SHARED_LIBS=1
+"D:\win10\cmake-4.2.1-windows-x86_64\bin\cmake.exe" -S ".\IllustrationVerse" -B ".\build-msvc" -G "Visual Studio 17 2022" -A x64    -DYOLOV8_WITH_TRT=ON   -DYOLOV8_TRT_ROOT="D:/win10/TensorRT-10.16.1.11.Windows.amd64.cuda-12.8"   -DYOLOV8_CUDA_ROOT="C:/Program Files/NVIDIA GPU Computing Toolkit/CUDA/v12.8"   -DCMAKE_PREFIX_PATH="D:/Qt/6.11.0/msvc2022_64"   -DOpenCV_DIR="D:/opencv4130/build" -DSD_BUILD_EXAMPLES=1 -DSD_BUILD_SHARED_LIBS=1  -DSD_CUDA=ON -DSD_VULKAN=ON -DOpenCL=ON  -DSYCL=ON 
   
-"D:\win10\cmake-4.2.1-windows-x86_64\bin\cmake.exe" --build ".\build-msvc" --config Release
+"D:\win10\cmake-4.2.1-windows-x86_64\bin\cmake.exe" --build ".\build-msvc" --config Release  -j16
 
-set PATH=D:\win10\TensorRT-10.16.1.11.Windows.amd64.cuda-13.2\lib;%PATH%
-set PATH=%PATH%;D:\Qt\6.11.0\msvc2022_64\bin;D:\opencv4130\build\x64\vc16\bin;"C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v13.2\bin";"C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v13.2\bin\x64"
+set PATH=D:\win10\TensorRT-10.16.1.11.Windows.amd64.cuda-12.8\lib;%PATH%
+set PATH=%PATH%;D:\Qt\6.11.0\msvc2022_64\bin;D:\opencv4130\build\x64\vc16\bin;"C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v12.8\bin";"C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v12.8\bin\x64"
 
 
 rem .\qSD_0.1_Windows_MSVC_CC_19.44.35226.0_17_x64_bin\Release\Anydraw.exe
@@ -69,11 +70,13 @@ sd-cli.exe -m .\models\checkpoints\animaPencilXL_v500.safetensors -p  "1 girl,"
 # $env:PATH = "D:\win10\TensorRT-10.16.1.11\lib;" + $env:PATH
 ```
 
-commd:
+260512commd:
 
 ```shell
-./sd-cli.exe    -m ./models/checkpoints/animaPencilXL_v500.safetensors -p "1 girl,"  --embd-dir  .\models\embeddings --lora-model-dir .\models\loras -n "bad hands, text, error, missing fingers, extra digit, fewer digits, cropped, worst quality, low quality, normal quality, jpeg artifacts, signature, watermark, username, blurry, Missing limbs, three arms, bad feet, text font ui, signature, blurry, malformed hands, long neck, mutated hands and fingers :1.5).(long body :1.3),(mutation ,poorly drawn :1.2), disfigured, malformed, mutated, multiple breasts, futa, yaoi, three legs, huge breasts,"  --cfg-scale  6 --strength  0.7  --steps   30 --sampling-method  dpm++2m --scheduler karras -W  1152 -H  896 --batch-count  2  -v  -o ../output/_v1-5-pruned-emaonly260512_195046_41.png  -s 41 -t 12  --rng  cuda   --sampler-rng  cuda   
-  
+.\sd-cli.exe    -m ./models/checkpoints/animaPencilXL_v500.safetensors -p "1 girl,"  --embd-dir  .\models\embeddings --lora-model-dir .\models\loras -n "bad hands, text, error, missing fingers, extra digit, fewer digits, cropped, worst quality, low quality, normal quality, jpeg artifacts, signature, watermark, username, blurry, Missing limbs, three arms, bad feet, text font ui, signature, blurry, malformed hands, long neck, mutated hands and fingers :1.5).(long body :1.3),(mutation ,poorly drawn :1.2), disfigured, malformed, mutated, multiple breasts, futa, yaoi, three legs, huge breasts,"  --cfg-scale  6 --strength  0.7  --steps   30 --sampling-method  dpm++2m --scheduler karras -W  1152 -H  896 --batch-count  2  -v  -o ../output/_v1-5-pruned-emaonly260512_195046_41.png  -s 41 -t 12  --rng  cuda   --sampler-rng  cuda   
+
+
+.\sd-cli.exe    -m ./models/checkpoints/animaPencilXL_v500.safetensors -p "1 girl,"  --embd-dir  .\models\embeddings --lora-model-dir .\models\loras -n "bad hands, text, error, missing fingers, extra digit, fewer digits, cropped, worst quality, low quality, normal quality, jpeg artifacts, signature, watermark, username, blurry, Missing limbs, three arms, bad feet, text font ui, signature, blurry, malformed hands, long neck, mutated hands and fingers :1.5).(long body :1.3),(mutation ,poorly drawn :1.2), disfigured, malformed, mutated, multiple breasts, futa, yaoi, three legs, huge breasts,"  --cfg-scale  6 --strength  0.7  --steps   30 --sampling-method  dpm++2m --scheduler karras -W  768 -H  512 --batch-count  2  -v  -o ../output/_v1-5-pruned-emaonly260512_195046_41.png  -s 41 -t 12  --rng  cuda   --sampler-rng  cuda   
 ```
 
 result:
