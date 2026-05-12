@@ -73,16 +73,46 @@ sd-cli.exe -m .\models\checkpoints\animaPencilXL_v500.safetensors -p  "1 girl,"
 260512commd:
 
 ```shell
-.\sd-cli.exe    -m ./models/checkpoints/animaPencilXL_v500.safetensors -p "1 girl,"  --embd-dir  .\models\embeddings --lora-model-dir .\models\loras -n "bad hands, text, error, missing fingers, extra digit, fewer digits, cropped, worst quality, low quality, normal quality, jpeg artifacts, signature, watermark, username, blurry, Missing limbs, three arms, bad feet, text font ui, signature, blurry, malformed hands, long neck, mutated hands and fingers :1.5).(long body :1.3),(mutation ,poorly drawn :1.2), disfigured, malformed, mutated, multiple breasts, futa, yaoi, three legs, huge breasts,"  --cfg-scale  6 --strength  0.7  --steps   30 --sampling-method  dpm++2m --scheduler karras -W  1152 -H  896 --batch-count  2  -v  -o ../output/_v1-5-pruned-emaonly260512_195046_41.png  -s 41 -t 12  --rng  cuda   --sampler-rng  cuda   
-
-
 .\sd-cli.exe    -m ./models/checkpoints/animaPencilXL_v500.safetensors -p "1 girl,"  --embd-dir  .\models\embeddings --lora-model-dir .\models\loras -n "bad hands, text, error, missing fingers, extra digit, fewer digits, cropped, worst quality, low quality, normal quality, jpeg artifacts, signature, watermark, username, blurry, Missing limbs, three arms, bad feet, text font ui, signature, blurry, malformed hands, long neck, mutated hands and fingers :1.5).(long body :1.3),(mutation ,poorly drawn :1.2), disfigured, malformed, mutated, multiple breasts, futa, yaoi, three legs, huge breasts,"  --cfg-scale  6 --strength  0.7  --steps   30 --sampling-method  dpm++2m --scheduler karras -W  768 -H  512 --batch-count  2  -v  -o ../output/_v1-5-pruned-emaonly260512_195046_41.png  -s 41 -t 12  --rng  cuda   --sampler-rng  cuda   
 ```
 
-result:
+result:260512-2356:
 
 ```shell
+G:\_busi1_MUST_BUSI_APP\proj_IllustrationVerse\qSD_0.1_Windows_MSVC_CC_19.44.35226.0_17_x64_bin\Release>
+G:\_busi1_MUST_BUSI_APP\proj_IllustrationVerse\qSD_0.1_Windows_MSVC_CC_19.44.35226.0_17_x64_bin\Release>sd-cli.exe -m .\models\checkpoints\animaPencilXL_v500.safetensors -p  "1 girl,"
+[INFO ] ggml_extend.hpp:63   - ggml_cuda_init: found 1 CUDA devices (Total VRAM: 24454 MiB):
+[INFO ] ggml_extend.hpp:63   -   Device 0: NVIDIA GeForce RTX 5090 D v2, compute capability 12.0, VMM: yes, VRAM: 24454 MiB
+[INFO ] stable-diffusion.cpp:212  - loading model from '.\models\checkpoints\animaPencilXL_v500.safetensors'
+[INFO ] model.cpp:219  - load .\models\checkpoints\animaPencilXL_v500.safetensors using safetensors format
+[INFO ] stable-diffusion.cpp:305  - Version: SDXL
+[INFO ] stable-diffusion.cpp:333  - Weight type stat:                      f16: 2513
+[INFO ] stable-diffusion.cpp:334  - Conditioner weight type stat:          f16: 585
+[INFO ] stable-diffusion.cpp:335  - Diffusion model weight type stat:      f16: 1680
+[INFO ] stable-diffusion.cpp:336  - VAE weight type stat:                  f16: 248
+[INFO ] stable-diffusion.cpp:640  - using VAE for encoding / decoding
+[INFO ] auto_encoder_kl.hpp:525  - vae decoder: ch = 128
+[WARN ] stable-diffusion.cpp:621  - No valid VAE specified with --vae or --force-sdxl-vae-conv-scale flag set, using Conv2D scale 0.031
+  |==================================================| 2513/2513 - 2.07GB/s[K
+[INFO ] model.cpp:999  - loading tensors completed, taking 3.09s (process: 0.00s, read: 0.95s, memcpy: 0.00s, convert: 0.00s, copy_to_backend: 2.02s)
+[INFO ] stable-diffusion.cpp:873  - total params memory size = 6558.89MB (VRAM 6558.89MB, RAM 0.00MB): text_encoders 1564.36MB(VRAM), diffusion_model 4900.07MB(VRAM), vae 94.47MB(VRAM), controlnet 0.00MB(VRAM), pmid 0.00MB(VRAM)
+[INFO ] stable-diffusion.cpp:931  - running in eps-prediction mode
+[INFO ] stable-diffusion.cpp:3367 - generate_image 512x512
+[INFO ] denoiser.hpp:499  - get_sigmas with discrete scheduler
+[INFO ] stable-diffusion.cpp:2814 - sampling using Euler A method
+[INFO ] stable-diffusion.cpp:3168 - get_learned_condition completed, taking 0.16s
+[INFO ] stable-diffusion.cpp:3401 - generating image: 1/1 - seed 42
+  |==================================================| 20/20 - 7.62it/s[K
+[INFO ] stable-diffusion.cpp:3432 - sampling completed, taking 2.64s
+[INFO ] stable-diffusion.cpp:3452 - generating 1 latent images completed, taking 2.66s
+[INFO ] stable-diffusion.cpp:3192 - decoding 1 latents
+[INFO ] stable-diffusion.cpp:3208 - latent 1 decoded, taking 0.13s
+[INFO ] stable-diffusion.cpp:3212 - decode_first_stage completed, taking 0.13s
+[INFO ] stable-diffusion.cpp:3591 - generate_image completed in 2.97s
+[INFO ] main.cpp:441  - save result image 0 to 'output.png' (success)
+[INFO ] main.cpp:490  - 1/1 images saved
 
+G:\_busi1_MUST_BUSI_APP\proj_IllustrationVerse\qSD_0.1_Windows_MSVC_CC_19.44.35226.0_17_x64_bin\Release>
 ```
 
 #### b、build-by-ucrt64:
