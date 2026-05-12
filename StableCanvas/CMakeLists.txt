@@ -78,3 +78,17 @@ set(windeployqt "${qt_binray_dir}/windeployqt.exe")
 add_custom_command(TARGET ${NAME} POST_BUILD COMMAND "${windeployqt}" "${EXECUTABLE_OUTPUT_PATH}/${NAME}.exe" --no-translations)
 message("--->windeployqt(or mac/linux): ${windeployqt}")
 endif()
+
+if(STABLEVERSE_BUILD_COMMERCIAL_PLUGINS)
+    set(_sv_plugin_api "${CMAKE_CURRENT_SOURCE_DIR}/../StableVerse/include/common")
+    add_library(StableCanvasPlugin SHARED stablecanvas_plugin.cpp)
+    target_include_directories(StableCanvasPlugin PRIVATE ${_sv_plugin_api})
+    target_link_libraries(StableCanvasPlugin PRIVATE Qt${QT_VERSION_MAJOR}::Widgets)
+    set_target_properties(StableCanvasPlugin PROPERTIES PREFIX "")
+    add_dependencies(StableCanvasPlugin StableVerse)
+    add_custom_command(
+        TARGET StableCanvasPlugin POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E make_directory "$<TARGET_FILE_DIR:StableVerse>/plugins"
+        COMMAND ${CMAKE_COMMAND} -E copy_if_different $<TARGET_FILE:StableCanvasPlugin>
+                "$<TARGET_FILE_DIR:StableVerse>/plugins")
+endif()

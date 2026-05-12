@@ -38,5 +38,19 @@ if(WIN32)
     target_link_libraries(${NAME} PRIVATE iphlpapi)
 endif()
 
+if(STABLEVERSE_BUILD_COMMERCIAL_PLUGINS)
+    set(_sv_plugin_api "${CMAKE_CURRENT_SOURCE_DIR}/../StableVerse/include/common")
+    add_library(StableVerse_ActivatorPlugin SHARED activator_plugin.cpp)
+    target_include_directories(StableVerse_ActivatorPlugin PRIVATE ${_sv_plugin_api})
+    target_link_libraries(StableVerse_ActivatorPlugin PRIVATE Qt${QT_VERSION_MAJOR}::Widgets)
+    set_target_properties(StableVerse_ActivatorPlugin PROPERTIES PREFIX "")
+    add_dependencies(StableVerse_ActivatorPlugin StableVerse)
+    add_custom_command(
+        TARGET StableVerse_ActivatorPlugin POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E make_directory "$<TARGET_FILE_DIR:StableVerse>/plugins"
+        COMMAND ${CMAKE_COMMAND} -E copy_if_different $<TARGET_FILE:StableVerse_ActivatorPlugin>
+                "$<TARGET_FILE_DIR:StableVerse>/plugins")
+endif()
+
 # Optional: Add resource file if you have one
 # qt_add_resources(${NAME} resources "resources.qrc")

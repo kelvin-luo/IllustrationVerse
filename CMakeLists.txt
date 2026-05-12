@@ -33,6 +33,9 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 include(cmake_Kelvin/ProjectSetting.cmake)
 # //------------------------------------------//
 
+option(STABLEVERSE_BUILD_COMMERCIAL_PLUGINS
+       "Build optional commercial plugin DLLs into StableVerse.exe/plugins" OFF)
+
 # add_subdirectory(stable-diffusion.cpp)
 # E:\_SourceForge\proj_qSD\thirdparty\stable-diffusion__QT_5_15_6_Windows_MSVC_C_19.43.34810.0_CC_19.43.34810.0__x64_bin-cu12.9.86
 # 设置 DLL 输出目录（可选）
@@ -74,12 +77,16 @@ endif()
 
 # add_subdirectory(Anydraw)    # 不带内存管理：非开源项目anydraw： 开源项目drawanything的绘画；
 # add_subdirectory(drawanything)    # 不带内存管理：drawanything
-add_subdirectory(extern/stable-diffusion)
-add_subdirectory(extern/StableVerse)
-add_subdirectory(StableCanvas) # 不带内存管理：开源项目full版即开源深度幻境DeepIIllusion ，对应的商业版本又名-**StableVerse（稳定幻境）**；
+add_subdirectory(stable-diffusion.cpp)
+add_subdirectory(StableVerse)
 
-# add_subdirectory(StableVerse_Enhance)
-# add_subdirectory(StableVerse_Activator)
+add_subdirectory(StableCanvas) # 不带内存管理：开源项目full版即开源深度幻境DeepIIllusion ，对应的商业版本又名-**StableVerse（稳定幻境）**；
+add_subdirectory(Anydraw)
+
+if(STABLEVERSE_BUILD_COMMERCIAL_PLUGINS)
+    add_subdirectory(StableVerse_Enhance)
+    add_subdirectory(StableVerse_Activator)
+endif()
 # add_subdirectory(DeepIIllusion) # 开源DeepIIllusion
 
 # add_subdirectory(StableCanvas) #带内存管理版本的：开源版本深邃的幻想ProfoundFantasy，对应的商业版本-**StableCanvas（稳定画布）**；
