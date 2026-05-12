@@ -40,23 +40,30 @@ $env:PATH = "D:\win10\TensorRT-10.16.1.11.Windows.amd64.cuda-13.2\lib;" + $env:P
 $env:PATH += ";D:\Qt\6.11.0\msvc2022_64\bin;D:\opencv4130\build\x64\vc16\bin;C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v13.2\bin;C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v13.2\nvvm\bin"
 ```
 
-by-cmd: 
+by-cmd: x64 Native Tools Command Prompt for VS2022:
 
-```shell
-cd  /d  G:\_busi1_MUST_BUSI_APP\proj_IllustrationVerse
+~~cd  /d  G:\_busi1_MUST_BUSI_APP\proj_IllustrationVerse~~
 
-"D:\win10\cmake-4.2.1-windows-x86_64\bin\cmake.exe" -S ".\src" -B ".\build-msvc" -G "Visual Studio 17 2022" -A x64    -DYOLOV8_WITH_TRT=ON   -DYOLOV8_TRT_ROOT="D:/win10/TensorRT-10.16.1.11.Windows.amd64.cuda-13.2"   -DYOLOV8_CUDA_ROOT="C:/Program Files/NVIDIA GPU Computing Toolkit/CUDA/v13.2"   -DCMAKE_PREFIX_PATH="D:/Qt/6.11.0/msvc2022_64"   -DOpenCV_DIR="D:/opencv4130/build"
+```cmd
+cd /d G:\_busi1_MUST_BUSI_APP\proj_IllustrationVerse
+
+"D:\win10\cmake-4.2.1-windows-x86_64\bin\cmake.exe" -S ".\IllustrationVerse" -B ".\build-msvc" -G "Visual Studio 17 2022" -A x64    -DYOLOV8_WITH_TRT=ON   -DYOLOV8_TRT_ROOT="D:/win10/TensorRT-10.16.1.11.Windows.amd64.cuda-13.2"   -DYOLOV8_CUDA_ROOT="C:/Program Files/NVIDIA GPU Computing Toolkit/CUDA/v13.2"   -DCMAKE_PREFIX_PATH="D:/Qt/6.11.0/msvc2022_64"   -DOpenCV_DIR="D:/opencv4130/build" -DSD_BUILD_EXAMPLES=1 -DSD_BUILD_SHARED_LIBS=1
   
 "D:\win10\cmake-4.2.1-windows-x86_64\bin\cmake.exe" --build ".\build-msvc" --config Release
 
 set PATH=D:\win10\TensorRT-10.16.1.11.Windows.amd64.cuda-13.2\lib;%PATH%
 set PATH=%PATH%;D:\Qt\6.11.0\msvc2022_64\bin;D:\opencv4130\build\x64\vc16\bin;"C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v13.2\bin";"C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v13.2\bin\x64"
 
-.\qSD_0.1_Windows_MSVC_CC_19.44.35226.0_17_x64_bin\Release\Anydraw.exe
 
-.\qSD_0.1_Windows_MSVC_CC_19.44.35226.0_17_x64_bin\Release\StableCanvas.exe
+rem .\qSD_0.1_Windows_MSVC_CC_19.44.35226.0_17_x64_bin\Release\Anydraw.exe
+rem .\qSD_0.1_Windows_MSVC_CC_19.44.35226.0_17_x64_bin\Release\StableCanvas.exe
+rem .\qSD_0.1_Windows_MSVC_CC_19.44.35226.0_17_x64_bin\Release\StableVerse.exe
 
-.\qSD_0.1_Windows_MSVC_CC_19.44.35226.0_17_x64_bin\Release\StableVerse.exe
+cd /d .\qSD_0.1_Windows_MSVC_CC_19.44.35226.0_17_x64_bin\Release
+
+.\StableVerse.exe
+
+sd-cli.exe -m .\models\checkpoints\animaPencilXL_v500.safetensors -p  "1 girl," 
 
 # —— 若你只在 PowerShell 里操作，用下面等价写法（不要用 set）：
 # $env:PATH = "D:\win10\TensorRT-10.16.1.11\lib;" + $env:PATH
@@ -65,7 +72,8 @@ set PATH=%PATH%;D:\Qt\6.11.0\msvc2022_64\bin;D:\opencv4130\build\x64\vc16\bin;"C
 commd:
 
 ```shell
-sd.exe -m ./models/checkpoints/animaPencilXL_v500.safetensors -p "1 girl,"  --embd-dir.\models\embeddings --lora-model-dir .\models\loras -n "bad hands, text, error, missing fingers, extra digit, fewer digits, cropped, worst quality, low quality, normal quality, jpeg artifacts, signature, watermark, username, blurry, Missing limbs, three arms, bad feet, text font ui, signature, blurry, malformed hands, long neck, mutated hands and fingers :1.5).(long body :1.3),(mutation ,poorly drawn :1.2), disfigured, malformed, mutated, multiple breasts, futa, yaoi, three legs, huge breasts,"  --cfg-scale  6 --strength  0.7  --steps   30 --sampling-method  dpm++2m --schedule karras -W  1152 -H  896 --batch-count  2  -v -o ../output/_v1-5-pruned-emaonly260512_163245_41.jpg -s 41 -t 12 
+./sd-cli.exe    -m ./models/checkpoints/animaPencilXL_v500.safetensors -p "1 girl,"  --embd-dir  .\models\embeddings --lora-model-dir .\models\loras -n "bad hands, text, error, missing fingers, extra digit, fewer digits, cropped, worst quality, low quality, normal quality, jpeg artifacts, signature, watermark, username, blurry, Missing limbs, three arms, bad feet, text font ui, signature, blurry, malformed hands, long neck, mutated hands and fingers :1.5).(long body :1.3),(mutation ,poorly drawn :1.2), disfigured, malformed, mutated, multiple breasts, futa, yaoi, three legs, huge breasts,"  --cfg-scale  6 --strength  0.7  --steps   30 --sampling-method  dpm++2m --scheduler karras -W  1152 -H  896 --batch-count  2  -v  -o ../output/_v1-5-pruned-emaonly260512_195046_41.png  -s 41 -t 12  --rng  cuda   --sampler-rng  cuda   
+  
 ```
 
 result:
