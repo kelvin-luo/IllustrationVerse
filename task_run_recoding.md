@@ -75,7 +75,7 @@ sd-cli.exe -m .\models\checkpoints\animaPencilXL_v500.safetensors -p  "1 girl,"
 ```shell
 .\sd-cli.exe    -m ./models/checkpoints/animaPencilXL_v500.safetensors -p "1 girl,"  --embd-dir  .\models\embeddings --lora-model-dir .\models\loras -n "bad hands, text, error, missing fingers, extra digit, fewer digits, cropped, worst quality, low quality, normal quality, jpeg artifacts, signature, watermark, username, blurry, Missing limbs, three arms, bad feet, text font ui, signature, blurry, malformed hands, long neck, mutated hands and fingers :1.5).(long body :1.3),(mutation ,poorly drawn :1.2), disfigured, malformed, mutated, multiple breasts, futa, yaoi, three legs, huge breasts,"  --cfg-scale  6 --strength  0.7  --steps   30 --sampling-method  dpm++2m --scheduler karras -W  768 -H  512 --batch-count  2  -v  -o ../output/_v1-5-pruned-emaonly260512_195046_41.png  -s 41 -t 12  --rng  cuda   --sampler-rng  cuda
 
-sd-cli.exe -m .\models\checkpoints\animaPencilXL_v500.safetensors -p "1 girl,"  --embd-dir  .\models\embeddings --lora-model-dir .\models\loras -n "bad hands, text, error, missing fingers, extra digit, fewer digits, cropped, worst quality, low quality, normal quality, jpeg artifacts, signature, watermark, username, blurry, Missing limbs, three arms, bad feet, text font ui, signature, blurry, malformed hands, long neck, mutated hands and fingers :1.5).(long body :1.3),(mutation ,poorly drawn :1.2), disfigured, malformed, mutated, multiple breasts, futa, yaoi, three legs, huge breasts,"  --cfg-scale  6 --strength  0.7  --steps   30 --sampling-method  dpm++2m --scheduler  karras -W  1152 -H  896 --batch-count  2  -v -o ../output/_v1-5-pruned-emaonly260512_234219_41.jpg -s 41 -t 12 
+
 ```
 
 result:260512-2356:
