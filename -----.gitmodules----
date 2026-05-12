@@ -1,0 +1,6 @@
+[submodule "extern/stable-diffusion"]
+	path = extern/stable-diffusion
+	url = https://github.com/leejet/stable-diffusion.cpp
+[submodule "extern/StableVerse"]
+	path = extern/StableVerse
+	url = https://github.com/kelvin-luo/StableVerse.git

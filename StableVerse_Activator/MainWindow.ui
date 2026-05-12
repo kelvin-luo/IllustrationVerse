@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>MainWindow</class>
+ <widget class="QMainWindow" name="MainWindow">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>400</width>
+    <height>300</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>Software License Activation</string>
+  </property>
+  <widget class="QWidget" name="centralWidget">
+   <layout class="QVBoxLayout" name="verticalLayout">
+    <item>
+     <widget class="QLabel" name="titleLabel">
+      <property name="styleSheet">
+       <string notr="true">font-size: 18px; font-weight: bold; margin-bottom: 20px;</string>
+      </property>
+      <property name="text">
+       <string>Software License Activation</string>
+      </property>
+      <property name="alignment">
+       <set>Qt::AlignmentFlag::AlignCenter</set>
+      </property>
+     </widget>
+    </item>
+    <item>
+     <widget class="QLabel" name="macAddressLabel">
+      <property name="styleSheet">
+       <string notr="true">font-weight: bold; margin-bottom: 10px;</string>
+      </property>
+     </widget>
+    </item>
+    <item>
+     <widget class="QLabel" name="statusLabel">
+      <property name="styleSheet">
+       <string notr="true">font-weight: bold; margin-bottom: 10px;</string>
+      </property>
+      <property name="text">
+       <string>Status: Not Licensed</string>
+      </property>
+     </widget>
+    </item>
+    <item>
+     <widget class="QLineEdit" name="licenseKeyEdit">
+      <property name="placeholderText">
+       <string>Enter your license key here</string>
+      </property>
+     </widget>
+    </item>
+    <item>
+     <layout class="QHBoxLayout" name="horizontalLayout">
+      <item>
+       <widget class="QPushButton" name="checkLicenseButton">
+        <property name="text">
+         <string>Generate License Key</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QPushButton" name="activateButton">
+        <property name="text">
+         <string>Activate</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QPushButton" name="pushButton_deactivate">
+        <property name="text">
+         <string>deactivate</string>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </item>
+   </layout>
+  </widget>
+ </widget>
+ <resources/>
+ <connections/>
+</ui>

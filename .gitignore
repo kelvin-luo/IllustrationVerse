@@ -1,0 +1,12 @@
+/build
+/*.user
+ 
+*.exe
+*.zip
+*.7z
+*.png
+*.jpg
+*.jpeg
+*.pdf
+*.pdb
+ 
