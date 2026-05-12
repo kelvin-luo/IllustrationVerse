@@ -1,0 +1,6 @@
+[submodule "StableVerse"]
+	path = StableVerse
+	url = https://github.com/kelvin-luo/StableVerse.git
+[submodule "stable-diffusion.cpp"]
+	path = stable-diffusion.cpp
+	url = https://github.com/leejet/stable-diffusion.cpp.git
