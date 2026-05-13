@@ -263,7 +263,7 @@ endif()
 add_subdirectory(StableVerse)
 
 add_subdirectory(canvas)   # canvas 插件库 / 独立程序（原 StableCanvas）
-add_subdirectory(anydraw)  # anydraw 插件库 / 独立程序（原 Anydraw）
+add_subdirectory(imgedit)  # anydraw 插件库 / 独立程序（原 Anydraw）
 
 if(STABLEVERSE_BUILD_COMMERCIAL_PLUGINS)
     add_subdirectory(enhance)     # enhance 插件库（原 StableVerse_Enhance）

@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.16)
 
-set(NAME anydraw)
+set(NAME imgedit)
 project(${NAME} LANGUAGES CXX)
 
 set(CMAKE_AUTOMOC ON)
