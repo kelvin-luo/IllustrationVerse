@@ -1,5 +1,5 @@
 # Commercial add-on: loaded at runtime from <StableVerse.exe dir>/plugins
-set(NAME StableVerse_Enhance)
+set(NAME enhance)
 
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)

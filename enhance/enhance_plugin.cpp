@@ -5,7 +5,7 @@
 
 class EnhancePlugin final : public IStableVersePlugin {
 public:
-    QString pluginId() const override { return QStringLiteral("StableVerse_Enhance"); }
+    QString pluginId() const override { return QStringLiteral("enhance"); }
     void initialize() override { (void)checkCommercialLicense(); }
 };
 

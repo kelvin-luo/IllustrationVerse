@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.16)
 
-set(NAME StableCanvas)
+set(NAME canvas)
 project(${NAME} LANGUAGES CXX)
 
 set(CMAKE_AUTOMOC ON)
@@ -81,14 +81,14 @@ endif()
 
 if(STABLEVERSE_BUILD_COMMERCIAL_PLUGINS)
     set(_sv_plugin_api "${CMAKE_CURRENT_SOURCE_DIR}/../StableVerse/include/common")
-    add_library(StableCanvasPlugin SHARED stablecanvas_plugin.cpp)
-    target_include_directories(StableCanvasPlugin PRIVATE ${_sv_plugin_api})
-    target_link_libraries(StableCanvasPlugin PRIVATE Qt${QT_VERSION_MAJOR}::Widgets)
-    set_target_properties(StableCanvasPlugin PROPERTIES PREFIX "")
-    add_dependencies(StableCanvasPlugin StableVerse)
+    add_library(canvas_plugin SHARED canvas_plugin.cpp)
+    target_include_directories(canvas_plugin PRIVATE ${_sv_plugin_api})
+    target_link_libraries(canvas_plugin PRIVATE Qt${QT_VERSION_MAJOR}::Widgets)
+    set_target_properties(canvas_plugin PROPERTIES PREFIX "")
+    add_dependencies(canvas_plugin StableVerse)
     add_custom_command(
-        TARGET StableCanvasPlugin POST_BUILD
+        TARGET canvas_plugin POST_BUILD
         COMMAND ${CMAKE_COMMAND} -E make_directory "$<TARGET_FILE_DIR:StableVerse>/plugins"
-        COMMAND ${CMAKE_COMMAND} -E copy_if_different $<TARGET_FILE:StableCanvasPlugin>
+        COMMAND ${CMAKE_COMMAND} -E copy_if_different $<TARGET_FILE:canvas_plugin>
                 "$<TARGET_FILE_DIR:StableVerse>/plugins")
 endif()

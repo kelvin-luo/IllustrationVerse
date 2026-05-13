@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.16)
 
-set(NAME Anydraw)
+set(NAME anydraw)
 project(${NAME} LANGUAGES CXX)
 
 set(CMAKE_AUTOMOC ON)
@@ -81,14 +81,14 @@ endif()
 
 if(STABLEVERSE_BUILD_COMMERCIAL_PLUGINS)
     set(_sv_plugin_api "${CMAKE_CURRENT_SOURCE_DIR}/../StableVerse/include/common")
-    add_library(AnydrawPlugin SHARED anydraw_plugin.cpp)
-    target_include_directories(AnydrawPlugin PRIVATE ${_sv_plugin_api})
-    target_link_libraries(AnydrawPlugin PRIVATE Qt${QT_VERSION_MAJOR}::Widgets)
-    set_target_properties(AnydrawPlugin PROPERTIES PREFIX "")
-    add_dependencies(AnydrawPlugin StableVerse)
+    add_library(anydraw_plugin SHARED anydraw_plugin.cpp)
+    target_include_directories(anydraw_plugin PRIVATE ${_sv_plugin_api})
+    target_link_libraries(anydraw_plugin PRIVATE Qt${QT_VERSION_MAJOR}::Widgets)
+    set_target_properties(anydraw_plugin PROPERTIES PREFIX "")
+    add_dependencies(anydraw_plugin StableVerse)
     add_custom_command(
-        TARGET AnydrawPlugin POST_BUILD
+        TARGET anydraw_plugin POST_BUILD
         COMMAND ${CMAKE_COMMAND} -E make_directory "$<TARGET_FILE_DIR:StableVerse>/plugins"
-        COMMAND ${CMAKE_COMMAND} -E copy_if_different $<TARGET_FILE:AnydrawPlugin>
+        COMMAND ${CMAKE_COMMAND} -E copy_if_different $<TARGET_FILE:anydraw_plugin>
                 "$<TARGET_FILE_DIR:StableVerse>/plugins")
 endif()

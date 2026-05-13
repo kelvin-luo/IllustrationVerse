@@ -17,7 +17,7 @@
 #     My Github homepage: https://github.com/kelvin-luo
 # */
 
-cmake_minimum_required(VERSION 3.15)
+cmake_minimum_required(VERSION 3.16)
 
 # kelvin-luo
 set(NAME qSD)
@@ -36,7 +36,6 @@ include(cmake_Kelvin/ProjectSetting.cmake)
 option(STABLEVERSE_BUILD_COMMERCIAL_PLUGINS
        "Build optional commercial plugin DLLs into StableVerse.exe/plugins" OFF)
 
-# add_subdirectory(stable-diffusion.cpp)
 # E:\_SourceForge\proj_qSD\thirdparty\stable-diffusion__QT_5_15_6_Windows_MSVC_C_19.43.34810.0_CC_19.43.34810.0__x64_bin-cu12.9.86
 # 设置 DLL 输出目录（可选）
 # set(NAME_EXE ${CMAKE_SOURCE_DIR}/../thirdparty/stable-diffusion__QT_5_15_6_Windows_MSVC_C_19.43.34810.0_CC_19.43.34810.0__x64_bin-cu12.9.86/sd.exe)
@@ -76,21 +75,31 @@ endif()
 # endif()
 
 
-# add_subdirectory(Anydraw)    # 不带内存管理：非开源项目anydraw： 开源项目drawanything的绘画；
-# add_subdirectory(drawanything)    # 不带内存管理：drawanything
-add_subdirectory(stable-diffusion.cpp)
+# stable-diffusion.cpp：CMake 拉取 https://github.com/leejet/stable-diffusion.cpp （含 ggml 子模块），不再使用本地子模块目录
+include(FetchContent)
+set(SD_BUILD_EXAMPLES OFF CACHE BOOL "sd: build examples" FORCE)
+FetchContent_Declare(
+    stable_diffusion_cpp
+    GIT_REPOSITORY https://github.com/leejet/stable-diffusion.cpp.git
+    GIT_TAG        master
+    GIT_SHALLOW    TRUE
+    # GIT_SUBMODULES "ggml"
+    GIT_SUBMODULES_RECURSE TRUE
+)
+FetchContent_MakeAvailable(stable_diffusion_cpp)
+
 add_subdirectory(StableVerse)
 
-add_subdirectory(StableCanvas) # 不带内存管理：开源项目full版即开源深度幻境DeepIIllusion ，对应的商业版本又名-**StableVerse（稳定幻境）**；
-add_subdirectory(Anydraw)
+add_subdirectory(canvas)   # canvas 插件库 / 独立程序（原 StableCanvas）
+add_subdirectory(anydraw)  # anydraw 插件库 / 独立程序（原 Anydraw）
 
 if(STABLEVERSE_BUILD_COMMERCIAL_PLUGINS)
-    add_subdirectory(StableVerse_Enhance)
-    add_subdirectory(StableVerse_Activator)
+    add_subdirectory(enhance)     # enhance 插件库（原 StableVerse_Enhance）
+    add_subdirectory(activator)    # activator 插件库（原 StableVerse_Activator）
 endif()
 # add_subdirectory(DeepIIllusion) # 开源DeepIIllusion
 
-# add_subdirectory(StableCanvas) #带内存管理版本的：开源版本深邃的幻想ProfoundFantasy，对应的商业版本-**StableCanvas（稳定画布）**；
+# add_subdirectory(canvas) # 带内存管理版本：ProfoundFantasy 等
 # add_subdirectory(ProfoundFantasy) # 开源ProfoundFantasy
 
 # 🔥⭐StableVerse交流群⭐🔥

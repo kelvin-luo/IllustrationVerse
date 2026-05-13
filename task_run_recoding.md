@@ -117,6 +117,24 @@ G:\_busi1_MUST_BUSI_APP\proj_IllustrationVerse\qSD_0.1_Windows_MSVC_CC_19.44.352
 G:\_busi1_MUST_BUSI_APP\proj_IllustrationVerse\qSD_0.1_Windows_MSVC_CC_19.44.35226.0_17_x64_bin\Release>
 ```
 
+260513:
+
+任务：
+
+```shell
+1、将依赖模块stable-diffusion.cpp改成基于cmake下载的模式，而不是作为git子模块。链接：https://github.com/leejet/stable-diffusion.cpp
+2、StableVerse_Activator改为activator插件库
+3、StableVerse_Enhance改为enhance插件库
+4、StableCanvas改为canvas插件库
+5、Anydraw改为anydraw插件库
+```
+
+
+
+
+
+
+
 #### b、build-by-ucrt64:
 
 ```shell
