@@ -94,7 +94,8 @@ if(WIN32 AND NOT ILLUSTRATIONVERSE_FETCHCONTENT_STAY_IN_BUILD_DIR)
         FORCE)
     file(MAKE_DIRECTORY "${FETCHCONTENT_BASE_DIR}")
 endif()
-set(SD_BUILD_EXAMPLES OFF CACHE BOOL "sd: build examples" FORCE)
+# 默认关闭 sd 示例；勿用 FORCE，否则每次 configure 都会覆盖 -DSD_BUILD_EXAMPLES=ON。
+set(SD_BUILD_EXAMPLES OFF CACHE BOOL "sd: build examples")
 FetchContent_Declare(
     stable_diffusion_cpp
     GIT_REPOSITORY https://github.com/leejet/stable-diffusion.cpp.git

@@ -48,7 +48,7 @@ by-cmd: x64 Native Tools Command Prompt for VS2022:
 ```cmd
 cd /d G:\_busi1_MUST_BUSI_APP\proj_IllustrationVerse
 
-"D:\win10\cmake-4.2.1-windows-x86_64\bin\cmake.exe" -S ".\IllustrationVerse" -B ".\build-msvc" -G "Visual Studio 17 2022" -A x64    -DYOLOV8_WITH_TRT=ON   -DYOLOV8_TRT_ROOT="D:/win10/TensorRT-10.16.1.11.Windows.amd64.cuda-12.8"   -DYOLOV8_CUDA_ROOT="C:/Program Files/NVIDIA GPU Computing Toolkit/CUDA/v12.8"   -DCMAKE_PREFIX_PATH="D:/Qt/6.11.0/msvc2022_64"   -DOpenCV_DIR="D:/opencv4130/build" -DSD_BUILD_EXAMPLES=1 -DSD_BUILD_SHARED_LIBS=1  -DSD_CUDA=ON -DSD_VULKAN=ON -DOpenCL=ON  -DSYCL=ON 
+"D:\win10\cmake-4.2.1-windows-x86_64\bin\cmake.exe" -S ".\IllustrationVerse" -B ".\build-msvc" -G "Visual Studio 17 2022" -A x64    -DYOLOV8_WITH_TRT=ON   -DYOLOV8_TRT_ROOT="D:/win10/TensorRT-10.16.1.11.Windows.amd64.cuda-12.8"   -DYOLOV8_CUDA_ROOT="C:/Program Files/NVIDIA GPU Computing Toolkit/CUDA/v12.8"   -DCMAKE_PREFIX_PATH="D:/Qt/6.11.0/msvc2022_64"   -DOpenCV_DIR="D:/opencv4130/build" -DSD_BUILD_EXAMPLES=ON  -DSD_BUILD_SHARED_LIBS=ON  -DSD_CUDA=ON -DSD_VULKAN=ON -DOpenCL=ON  -DSYCL=ON 
   
 "D:\win10\cmake-4.2.1-windows-x86_64\bin\cmake.exe" --build ".\build-msvc" --config Release  -j16
 
