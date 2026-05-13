@@ -88,12 +88,18 @@ endif()
 
 # stable-diffusion.cpp：CMake 拉取 https://github.com/leejet/stable-diffusion.cpp （含 ggml 子模块），不再使用本地子模块目录
 include(FetchContent)
-# ggml-vulkan 在极深的 ExternalProject 里跑 TryCompile；路径过长时 MSBuild FileTracker 报 FTK1011。
+# ggml-vulkan 在极深的 ExternalProject 里跑 TryCompile；路径过长时 MSBuild FileTracker 报 FTK1011 / MSVC 报 C1083（~250 字符对象路径上限）。
 # 已有 CMakeCache 里若写过 FETCHCONTENT_BASE_DIR，普通 set(CACHE) 不会覆盖，故默认用 FORCE 指到短路径。
 option(ILLUSTRATIONVERSE_FETCHCONTENT_STAY_IN_BUILD_DIR
        "Keep FetchContent under build/_deps (Windows: 易触发 vulkan-shaders-gen 的 FTK1011)" OFF)
 if(WIN32 AND NOT ILLUSTRATIONVERSE_FETCHCONTENT_STAY_IN_BUILD_DIR)
-    file(TO_CMAKE_PATH "$ENV{LOCALAPPDATA}/IllustrationVerse-fetchcontent" _iv_fetchcontent_base)
+    # vulkan-shaders-gen ExternalProject nests CMakeScratch paths; AppData\...\IllustrationVerse-fetchcontent
+    # is still too long for MSVC (CMAKE_OBJECT_PATH_MAX ~250). Prefer drive-root ".ivfc" next to the build.
+    if(CMAKE_BINARY_DIR MATCHES "^([A-Za-z]):([/\\\\]|$)")
+        set(_iv_fetchcontent_base "${CMAKE_MATCH_1}:/.ivfc")
+    else()
+        file(TO_CMAKE_PATH "$ENV{LOCALAPPDATA}/ivfc" _iv_fetchcontent_base)
+    endif()
     # One shared short root; subdirectory per generator + C++ compiler so switching Qt kits
     # (MSVC vs MinGW+Ninja) does not reuse stable_diffusion_cpp-subbuild/CMakeCache from another generator.
     set(_iv_fc_suffix "${CMAKE_GENERATOR}-${CMAKE_CXX_COMPILER_ID}")
@@ -105,12 +111,14 @@ if(WIN32 AND NOT ILLUSTRATIONVERSE_FETCHCONTENT_STAY_IN_BUILD_DIR)
 endif()
 # stable-diffusion.cpp：预置缓存默认值（勿用 FORCE，命令行 -D 仍可覆盖已写入缓存的值）。
 # OpenCL / SYCL 在 upstream 中为 SD_OPENCL、SD_SYCL（等价于曾用 -DSD_OPENCL=ON -DSD_SYCL=ON）。
+# SD_SYCL 默认 OFF：ggml-sycl 需要支持 SYCL 的 C++ 编译器（如 Intel oneAPI DPC++），纯 MSVC 会报
+# "C++ compiler lacks SYCL support"。需要时用 -DSD_SYCL=ON 并选用 DPC++ 工具链。
 set(SD_BUILD_EXAMPLES ON CACHE BOOL "sd: build examples")
 set(SD_BUILD_SHARED_LIBS ON CACHE BOOL "sd: build shared libs")
 set(SD_CUDA ON CACHE BOOL "sd: cuda backend")
 set(SD_VULKAN ON CACHE BOOL "sd: vulkan backend")
 set(SD_OPENCL ON CACHE BOOL "sd: opencl backend")
-set(SD_SYCL ON CACHE BOOL "sd: sycl backend")
+set(SD_SYCL OFF CACHE BOOL "sd: sycl backend (needs SYCL compiler, not plain MSVC)")
 FetchContent_Declare(
     stable_diffusion_cpp
     GIT_REPOSITORY https://github.com/leejet/stable-diffusion.cpp.git
@@ -192,7 +200,9 @@ project("vulkan-shaders-gen" C CXX)]]
                 file(WRITE "${_iv_vk_shaders_cmake}" "${_iv_vks_raw}")
             endif()
             set(_iv_ep_needle "        SOURCE_DIR \${CMAKE_CURRENT_SOURCE_DIR}/vulkan-shaders\n        CMAKE_ARGS -DCMAKE_INSTALL_PREFIX=\${CMAKE_BINARY_DIR}/\$<CONFIG>")
-            set(_iv_ep_replace "        SOURCE_DIR \${CMAKE_CURRENT_SOURCE_DIR}/vulkan-shaders\n        # IllustrationVerse: Ninja for vulkan-shaders-gen (avoid MSVC FileTracker FTK1011)\n        CMAKE_GENERATOR Ninja\n        CMAKE_MAKE_PROGRAM \"${_iv_ninja_cmake}\"\n        CMAKE_ARGS -DCMAKE_INSTALL_PREFIX=\${CMAKE_BINARY_DIR}/\$<CONFIG>")
+            # Pass CMAKE_MAKE_PROGRAM inside CMAKE_ARGS; ExternalProject+CMake 4.x was emitting
+            # "-GNinja CMAKE_MAKE_PROGRAM D:/.../ninja.exe" (missing -D), breaking nested configure.
+            set(_iv_ep_replace "        SOURCE_DIR \${CMAKE_CURRENT_SOURCE_DIR}/vulkan-shaders\n        # IllustrationVerse: Ninja for vulkan-shaders-gen (CMAKE_ARGS MAKE_PROGRAM; short paths)\n        CMAKE_GENERATOR Ninja\n        CMAKE_ARGS \"-DCMAKE_MAKE_PROGRAM=${_iv_ninja_cmake}\" -DCMAKE_INSTALL_PREFIX=\${CMAKE_BINARY_DIR}/\$<CONFIG>")
             string(REPLACE "${_iv_ep_needle}" "${_iv_ep_replace}" _iv_ggml_vk_raw "${_iv_ggml_vk_raw}")
             string(FIND "${_iv_ggml_vk_raw}" "IllustrationVerse: Ninja for vulkan-shaders-gen" _iv_ninja_verify)
             if(_iv_ninja_verify EQUAL -1)
@@ -200,6 +210,24 @@ project("vulkan-shaders-gen" C CXX)]]
             else()
                 file(WRITE "${_iv_ggml_vulkan_cmake}" "${_iv_ggml_vk_raw}")
                 message(STATUS "vulkan-shaders-gen ExternalProject uses Ninja: ${_iv_ninja_cmake}")
+            endif()
+        else()
+            # v1 used ExternalProject CMAKE_MAKE_PROGRAM; CMake 4.x nested configure omits -DCMAKE_MAKE_PROGRAM=.
+            if(_iv_ggml_vk_raw MATCHES "CMAKE_GENERATOR Ninja" AND _iv_ggml_vk_raw MATCHES "CMAKE_MAKE_PROGRAM \"")
+                string(REGEX REPLACE
+                    "CMAKE_GENERATOR Ninja(\r?\n)([ \t]*)CMAKE_MAKE_PROGRAM \"[^\"]+\"(\r?\n)([ \t]*)CMAKE_ARGS "
+                    "CMAKE_GENERATOR Ninja\\1\\2CMAKE_ARGS \"-DCMAKE_MAKE_PROGRAM=${_iv_ninja_cmake}\" "
+                    _iv_ggml_vk_raw "${_iv_ggml_vk_raw}")
+                string(REPLACE "# IllustrationVerse: Ninja for vulkan-shaders-gen (avoid MSVC FileTracker FTK1011)"
+                    "# IllustrationVerse: Ninja for vulkan-shaders-gen (CMAKE_ARGS MAKE_PROGRAM; short paths)"
+                    _iv_ggml_vk_raw "${_iv_ggml_vk_raw}")
+                file(WRITE "${_iv_ggml_vulkan_cmake}" "${_iv_ggml_vk_raw}")
+                set(_iv_vkgen_rm "${stable_diffusion_cpp_BINARY_DIR}/ggml/src/ggml-vulkan/vulkan-shaders-gen-prefix/src/vulkan-shaders-gen-build")
+                if(EXISTS "${_iv_vkgen_rm}")
+                    file(REMOVE_RECURSE "${_iv_vkgen_rm}")
+                    message(STATUS "Removed vulkan-shaders-gen-build after Ninja patch upgrade")
+                endif()
+                message(STATUS "Upgraded vulkan-shaders-gen Ninja patch (CMAKE_MAKE_PROGRAM → CMAKE_ARGS)")
             endif()
         endif()
     endif()
