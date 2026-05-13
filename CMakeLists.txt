@@ -26,7 +26,7 @@ if(WIN32 AND CMAKE_GENERATOR MATCHES "Visual Studio")
 endif()
 
 # kelvin-luo
-set(NAME qSD)
+set(NAME IllustrationVerse)
 project(${NAME} VERSION 0.1 LANGUAGES CXX)
 
 
@@ -38,6 +38,11 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 # //------------------------------------------//
 include(cmake_Kelvin/ProjectSetting.cmake)
 # //------------------------------------------//
+
+# add_def
+# DSD_BUILD_EXAMPLES=ON  -DSD_BUILD_SHARED_LIBS=ON  -DSD_CUDA=ON -DSD_VULKAN=ON -DOpenCL=ON  -DSYCL=ON
+
+
 
 option(STABLEVERSE_BUILD_COMMERCIAL_PLUGINS
        "Build optional commercial plugin DLLs into StableVerse.exe/plugins" OFF)
@@ -89,13 +94,23 @@ option(ILLUSTRATIONVERSE_FETCHCONTENT_STAY_IN_BUILD_DIR
        "Keep FetchContent under build/_deps (Windows: 易触发 vulkan-shaders-gen 的 FTK1011)" OFF)
 if(WIN32 AND NOT ILLUSTRATIONVERSE_FETCHCONTENT_STAY_IN_BUILD_DIR)
     file(TO_CMAKE_PATH "$ENV{LOCALAPPDATA}/IllustrationVerse-fetchcontent" _iv_fetchcontent_base)
-    set(FETCHCONTENT_BASE_DIR "${_iv_fetchcontent_base}"
+    # One shared short root; subdirectory per generator + C++ compiler so switching Qt kits
+    # (MSVC vs MinGW+Ninja) does not reuse stable_diffusion_cpp-subbuild/CMakeCache from another generator.
+    set(_iv_fc_suffix "${CMAKE_GENERATOR}-${CMAKE_CXX_COMPILER_ID}")
+    string(REGEX REPLACE "[^A-Za-z0-9_.+-]" "_" _iv_fc_suffix "${_iv_fc_suffix}")
+    set(FETCHCONTENT_BASE_DIR "${_iv_fetchcontent_base}/${_iv_fc_suffix}"
         CACHE PATH "FetchContent 根目录（短路径，减轻 ggml Vulkan 嵌套配置的 FTK1011 / MAX_PATH）"
         FORCE)
     file(MAKE_DIRECTORY "${FETCHCONTENT_BASE_DIR}")
 endif()
-# 默认关闭 sd 示例；勿用 FORCE，否则每次 configure 都会覆盖 -DSD_BUILD_EXAMPLES=ON。
-set(SD_BUILD_EXAMPLES OFF CACHE BOOL "sd: build examples")
+# stable-diffusion.cpp：预置缓存默认值（勿用 FORCE，命令行 -D 仍可覆盖已写入缓存的值）。
+# OpenCL / SYCL 在 upstream 中为 SD_OPENCL、SD_SYCL（等价于曾用 -DSD_OPENCL=ON -DSD_SYCL=ON）。
+set(SD_BUILD_EXAMPLES ON CACHE BOOL "sd: build examples")
+set(SD_BUILD_SHARED_LIBS ON CACHE BOOL "sd: build shared libs")
+set(SD_CUDA ON CACHE BOOL "sd: cuda backend")
+set(SD_VULKAN ON CACHE BOOL "sd: vulkan backend")
+set(SD_OPENCL ON CACHE BOOL "sd: opencl backend")
+set(SD_SYCL ON CACHE BOOL "sd: sycl backend")
 FetchContent_Declare(
     stable_diffusion_cpp
     GIT_REPOSITORY https://github.com/leejet/stable-diffusion.cpp.git
@@ -107,6 +122,43 @@ FetchContent_Declare(
     UPDATE_DISCONNECTED TRUE
 )
 FetchContent_MakeAvailable(stable_diffusion_cpp)
+
+# stable-diffusion.cpp is a very large TU: default COFF .obj section limit on Windows.
+# MinGW: GNU as -mbigobj; MSVC: C1128 → /bigobj.
+if(WIN32)
+    if(TARGET stable-diffusion)
+        if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
+            target_compile_options(stable-diffusion PRIVATE "-Wa,-mbig-obj")
+        elseif(MSVC)
+            target_compile_options(stable-diffusion PRIVATE /bigobj)
+        endif()
+    endif()
+endif()
+
+# ggml-cpu.c uses THREAD_POWER_THROTTLING_STATE behind #if _WIN32_WINNT >= 0x0602; that API is
+# Win10+ only. MinGW + Qt kits often set _WIN32_WINNT to 0x0602 so the #if passes but headers
+# omit the type → compile error. Tighten the guard to Win10 and require the SDK macro.
+set(_iv_ggml_cpu_c "${stable_diffusion_cpp_SOURCE_DIR}/ggml/src/ggml-cpu/ggml-cpu.c")
+if(EXISTS "${_iv_ggml_cpu_c}")
+    file(READ "${_iv_ggml_cpu_c}" _iv_ggml_cpu_raw)
+    string(FIND "${_iv_ggml_cpu_raw}" "IllustrationVerse: ggml thread power throttling WINNT guard" _iv_cpu_pt_marker)
+    if(_iv_cpu_pt_marker EQUAL -1)
+        string(REPLACE
+            [[        #if _WIN32_WINNT >= 0x0602
+        THREAD_POWER_THROTTLING_STATE t;]]
+            [[        /* IllustrationVerse: ggml thread power throttling WINNT guard */
+        #if _WIN32_WINNT >= 0x0A00 && defined(THREAD_POWER_THROTTLING_CURRENT_VERSION)
+        THREAD_POWER_THROTTLING_STATE t;]]
+            _iv_ggml_cpu_raw "${_iv_ggml_cpu_raw}")
+        string(FIND "${_iv_ggml_cpu_raw}" "IllustrationVerse: ggml thread power throttling WINNT guard" _iv_cpu_pt_verify)
+        if(_iv_cpu_pt_verify EQUAL -1)
+            message(WARNING "Could not patch ggml-cpu.c thread power throttling #if; MinGW may fail to compile.")
+        else()
+            file(WRITE "${_iv_ggml_cpu_c}" "${_iv_ggml_cpu_raw}")
+            message(STATUS "Patched ggml-cpu.c: Win10+ guard for THREAD_POWER_THROTTLING_STATE")
+        endif()
+    endif()
+endif()
 
 set(_iv_vk_shaders_cmake "${stable_diffusion_cpp_SOURCE_DIR}/ggml/src/ggml-vulkan/vulkan-shaders/CMakeLists.txt")
 set(_iv_ggml_vulkan_cmake "${stable_diffusion_cpp_SOURCE_DIR}/ggml/src/ggml-vulkan/CMakeLists.txt")
