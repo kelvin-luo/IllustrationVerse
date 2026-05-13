@@ -19,6 +19,12 @@
 
 cmake_minimum_required(VERSION 3.16)
 
+# Nested ggml ExternalProject try-compiles hit MSBuild FileTracker FTK1011 on some paths; VS
+# generators honor this global for all .vcxproj (including custom build steps).
+if(WIN32 AND CMAKE_GENERATOR MATCHES "Visual Studio")
+    set(CMAKE_VS_GLOBALS "TrackFileAccess=false")
+endif()
+
 # kelvin-luo
 set(NAME qSD)
 project(${NAME} VERSION 0.1 LANGUAGES CXX)
@@ -77,6 +83,17 @@ endif()
 
 # stable-diffusion.cpp：CMake 拉取 https://github.com/leejet/stable-diffusion.cpp （含 ggml 子模块），不再使用本地子模块目录
 include(FetchContent)
+# ggml-vulkan 在极深的 ExternalProject 里跑 TryCompile；路径过长时 MSBuild FileTracker 报 FTK1011。
+# 已有 CMakeCache 里若写过 FETCHCONTENT_BASE_DIR，普通 set(CACHE) 不会覆盖，故默认用 FORCE 指到短路径。
+option(ILLUSTRATIONVERSE_FETCHCONTENT_STAY_IN_BUILD_DIR
+       "Keep FetchContent under build/_deps (Windows: 易触发 vulkan-shaders-gen 的 FTK1011)" OFF)
+if(WIN32 AND NOT ILLUSTRATIONVERSE_FETCHCONTENT_STAY_IN_BUILD_DIR)
+    file(TO_CMAKE_PATH "$ENV{LOCALAPPDATA}/IllustrationVerse-fetchcontent" _iv_fetchcontent_base)
+    set(FETCHCONTENT_BASE_DIR "${_iv_fetchcontent_base}"
+        CACHE PATH "FetchContent 根目录（短路径，减轻 ggml Vulkan 嵌套配置的 FTK1011 / MAX_PATH）"
+        FORCE)
+    file(MAKE_DIRECTORY "${FETCHCONTENT_BASE_DIR}")
+endif()
 set(SD_BUILD_EXAMPLES OFF CACHE BOOL "sd: build examples" FORCE)
 FetchContent_Declare(
     stable_diffusion_cpp
@@ -85,8 +102,82 @@ FetchContent_Declare(
     GIT_SHALLOW    TRUE
     # GIT_SUBMODULES "ggml"
     GIT_SUBMODULES_RECURSE TRUE
+    # 本地修补 vulkan-shaders/CMakeLists.txt 后避免每次 configure 执行 git pull 因脏工作区失败
+    UPDATE_DISCONNECTED TRUE
 )
 FetchContent_MakeAvailable(stable_diffusion_cpp)
+
+set(_iv_vk_shaders_cmake "${stable_diffusion_cpp_SOURCE_DIR}/ggml/src/ggml-vulkan/vulkan-shaders/CMakeLists.txt")
+set(_iv_ggml_vulkan_cmake "${stable_diffusion_cpp_SOURCE_DIR}/ggml/src/ggml-vulkan/CMakeLists.txt")
+if(EXISTS "${_iv_ggml_vulkan_cmake}")
+    file(READ "${_iv_ggml_vulkan_cmake}" _iv_ggml_vk_undo)
+    if(_iv_ggml_vk_undo MATCHES "-DCMAKE_VS_GLOBALS=TrackFileAccess=false -DCMAKE_INSTALL_PREFIX=")
+        string(REPLACE "-DCMAKE_VS_GLOBALS=TrackFileAccess=false -DCMAKE_INSTALL_PREFIX=" "-DCMAKE_INSTALL_PREFIX="
+            _iv_ggml_vk_undo "${_iv_ggml_vk_undo}")
+        file(WRITE "${_iv_ggml_vulkan_cmake}" "${_iv_ggml_vk_undo}")
+    endif()
+endif()
+
+find_program(_iv_ninja NAMES ninja ninja.exe)
+if(_iv_ninja)
+    file(TO_CMAKE_PATH "${_iv_ninja}" _iv_ninja_cmake)
+    if(EXISTS "${_iv_ggml_vulkan_cmake}")
+        file(READ "${_iv_ggml_vulkan_cmake}" _iv_ggml_vk_raw)
+        string(FIND "${_iv_ggml_vk_raw}" "IllustrationVerse: Ninja for vulkan-shaders-gen" _iv_ninja_marker)
+        if(_iv_ninja_marker EQUAL -1)
+            if(EXISTS "${_iv_vk_shaders_cmake}")
+                file(READ "${_iv_vk_shaders_cmake}" _iv_vks_raw)
+                string(REPLACE [[cmake_minimum_required(VERSION 3.19)
+# IllustrationVerse: FT workaround — MSBuild FileTracker FTK1011 on try-compile .tlog (must precede project()).
+if(WIN32 AND CMAKE_GENERATOR MATCHES "Visual Studio")
+    set(CMAKE_VS_GLOBALS "TrackFileAccess=false")
+endif()
+project("vulkan-shaders-gen" C CXX)]]
+                    [[cmake_minimum_required(VERSION 3.19)
+project("vulkan-shaders-gen" C CXX)]]
+                    _iv_vks_raw "${_iv_vks_raw}")
+                file(WRITE "${_iv_vk_shaders_cmake}" "${_iv_vks_raw}")
+            endif()
+            set(_iv_ep_needle "        SOURCE_DIR \${CMAKE_CURRENT_SOURCE_DIR}/vulkan-shaders\n        CMAKE_ARGS -DCMAKE_INSTALL_PREFIX=\${CMAKE_BINARY_DIR}/\$<CONFIG>")
+            set(_iv_ep_replace "        SOURCE_DIR \${CMAKE_CURRENT_SOURCE_DIR}/vulkan-shaders\n        # IllustrationVerse: Ninja for vulkan-shaders-gen (avoid MSVC FileTracker FTK1011)\n        CMAKE_GENERATOR Ninja\n        CMAKE_MAKE_PROGRAM \"${_iv_ninja_cmake}\"\n        CMAKE_ARGS -DCMAKE_INSTALL_PREFIX=\${CMAKE_BINARY_DIR}/\$<CONFIG>")
+            string(REPLACE "${_iv_ep_needle}" "${_iv_ep_replace}" _iv_ggml_vk_raw "${_iv_ggml_vk_raw}")
+            string(FIND "${_iv_ggml_vk_raw}" "IllustrationVerse: Ninja for vulkan-shaders-gen" _iv_ninja_verify)
+            if(_iv_ninja_verify EQUAL -1)
+                message(WARNING "Could not patch ggml-vulkan ExternalProject for Ninja; vulkan-shaders-gen may hit FTK1011.")
+            else()
+                file(WRITE "${_iv_ggml_vulkan_cmake}" "${_iv_ggml_vk_raw}")
+                message(STATUS "vulkan-shaders-gen ExternalProject uses Ninja: ${_iv_ninja_cmake}")
+            endif()
+        endif()
+    endif()
+elseif(WIN32 AND EXISTS "${_iv_vk_shaders_cmake}")
+    file(READ "${_iv_vk_shaders_cmake}" _iv_vks_raw)
+    string(FIND "${_iv_vks_raw}" "IllustrationVerse: FT workaround" _iv_vks_marker)
+    if(_iv_vks_marker EQUAL -1)
+        string(REPLACE [[cmake_minimum_required(VERSION 3.19)
+project("vulkan-shaders-gen" C CXX)]]
+            [[cmake_minimum_required(VERSION 3.19)
+# IllustrationVerse: FT workaround — install Ninja for a reliable fix (PATH: ninja.exe).
+if(WIN32 AND CMAKE_GENERATOR MATCHES "Visual Studio")
+    set(CMAKE_VS_GLOBALS "TrackFileAccess=false")
+endif()
+project("vulkan-shaders-gen" C CXX)]]
+            _iv_vks_raw "${_iv_vks_raw}")
+        file(WRITE "${_iv_vk_shaders_cmake}" "${_iv_vks_raw}")
+        message(STATUS "Patched ggml vulkan-shaders/CMakeLists.txt (ninja not found): CMAKE_VS_GLOBALS before nested project()")
+    endif()
+endif()
+
+set(_iv_vkgen_build "${stable_diffusion_cpp_BINARY_DIR}/ggml/src/ggml-vulkan/vulkan-shaders-gen-prefix/src/vulkan-shaders-gen-build")
+if(EXISTS "${_iv_ggml_vulkan_cmake}" AND EXISTS "${_iv_vkgen_build}/CMakeCache.txt")
+    file(READ "${_iv_ggml_vulkan_cmake}" _iv_ggml_vk_chk)
+    file(READ "${_iv_vkgen_build}/CMakeCache.txt" _iv_vkgen_cache)
+    if(_iv_ggml_vk_chk MATCHES "IllustrationVerse: Ninja for vulkan-shaders-gen"
+       AND _iv_vkgen_cache MATCHES "CMAKE_GENERATOR:INTERNAL=Visual Studio")
+        file(REMOVE_RECURSE "${_iv_vkgen_build}")
+        message(STATUS "Removed stale vulkan-shaders-gen-build (nested project will reconfigure with Ninja)")
+    endif()
+endif()
 
 add_subdirectory(StableVerse)
 
